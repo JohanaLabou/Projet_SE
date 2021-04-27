@@ -171,6 +171,9 @@ void acheteur(int pSEcriture[], int pSLecture[], int pTEcriture[], int pTLecture
 
     nread = read(pSLecture[0],buf, MSGSIZE); // on lit la Q4
     printf("ACHETEUR. Message reçu du serveur.  Taille = %d. Contenu = \"%s\".\n", nread, buf);
+
+    nread = read(pSLecture[0],buf, MSGSIZE); // on lit la Q4
+    printf("ACHETEUR. Message reçu du serveur.  Taille = %d. Contenu = \"%s\".\n", nread, buf);
     
     /* Question 5: l'acheteur paie en saisissant son numéro de carte bancaire et son cryptogramme */
 
@@ -227,12 +230,41 @@ void serveur(int pAEcriture[], int pALecture[], int pTEcriture[]){
     strcat(msg7, getMontantFacture());
     write(pAEcriture[1], msg7, MSGSIZE); // Question 6: le serveur web envoie un accusé de réception du paiement à l'acheteur, rappelant le montant total de la transaction
 
-    strcat(msg8, getNombrePalettes());
+    /*strcat(msg8, getNombrePalettes());
     write(pTEcriture[1], msg8, MSGSIZE);
-    write(pTEcriture[1], msg8, MSGSIZE); // Question 7: le serveur web transmet un bon de livraison comprenant le nombre de palettes de l'article choisi, en double exemplaires au transporteur
+    write(pTEcriture[1], msg8, MSGSIZE);*/ // Question 7: le serveur web transmet un bon de livraison comprenant le nombre de palettes de l'article choisi, en double exemplaires au transporteur
 
 }
 
+void transporteur(int pAEcriture[], int pALecture[], int pSLecture[]){
+    close(pAEcriture[0]);
+    close(pALecture[1]);
+    close(pSLecture[1]);
+
+    int nread;
+    char buf[MSGSIZE];
+
+    /*
+    nread = read(pSLecture[0], buf, MSGSIZE); // On lit la Q7
+    switch (nread){
+        case -1:
+            if (errno == EAGAIN){
+                printf("Tube vide\n");
+                sleep(1);
+            } else {
+                perror("Lecture\n");
+                exit(102);
+            }
+            break;
+        default:
+            printf("TRANSPORTEUR. Message reçu du serveur. Taille = %d. Contenu = \"%s\".\n", nread, buf);
+            break;
+    }
+    nread = read(pSLecture[0], buf, MSGSIZE); // Q7
+    printf("TRANSPORTEUR. Message reçu du serveur. Taille = %d. Contenu = \"%s\".\n", nread, buf);
+    */
+
+}
 
 char* getNombrePalettes(){
     printf("SERVEUR. Calcul du nombre de palettes...\n");
@@ -263,35 +295,6 @@ char* getMontantFacture(){
     sprintf(prixFacture, "%d", prixTotal);
 	return prixFacture;
 }
-
-void transporteur(int pAEcriture[], int pALecture[], int pSLecture[]){
-    close(pAEcriture[0]);
-    close(pALecture[1]);
-    close(pSLecture[1]);
-
-    int nread;
-    char buf[MSGSIZE];
-
-    nread = read(pSLecture[0], buf, MSGSIZE); // On lit la Q7
-    switch (nread){
-        case -1:
-            if (errno == EAGAIN){
-                printf("Tube vide\n");
-                sleep(1);
-            } else {
-                perror("Lecture\n");
-                exit(102);
-            }
-            break;
-        default:
-            printf("TRANSPORTEUR. Message reçu du serveur. Taille = %d. Contenu = \"%s\".\n", nread, buf);
-            break;
-    }
-    nread = read(pSLecture[0], buf, MSGSIZE); // Q7
-    printf("TRANSPORTEUR. Message reçu du serveur. Taille = %d. Contenu = \"%s\".\n", nread, buf);
-
-}
-
 
 char* concat(const char *s1, const char *s2)
 {
