@@ -22,15 +22,17 @@ char* concat(const char *s1, const char *s2);
 char* getMontantFacture();
 char* getNombrePalettes();
 
-char* msg1 = "Bonjour, je souhaiterais avoir l'article ";
-char* msg2 = "Le nombre de rouleaux en stock disponibles pour cet article est ";
-char* msg3 = "Je souhaite passer une commande pour une surface de ";
-char msg4[MSGSIZE] = "Commande reçue. Nombre total de palettes: ";
-char msg5[MSGSIZE] = "Montant total de la facture: ";
+char* msg1 = "Bonjour, je souhaiterais avoir l'article "; // Q1
+char* msg2 = "Le nombre de rouleaux en stock disponibles pour cet article est "; // Q2
+char* msg3 = "Je souhaite passer une commande pour une surface de "; // Q3
+char msg4[MSGSIZE] = "Commande recue. Nombre total de palettes: "; // Q4
+char msg5[MSGSIZE] = "Montant total de la facture: "; // Q4
 char* msg6 = ""; // Question 5
-char* msg7 = "J'accuse réception de votre paiment. Le montant de la transaction était de: ";
-char* msg8 = "Voici le bon de livraison. Pour rappel, le nombre de palettes de l'article choisi est: ";
-char* msg9 = "Je suis votre livreur. Voici les 2 bons";
+char* msg7 = "J'accuse reception de votre paiment. Le montant de la transaction etait de: "; // Q6
+char* msg8 = "Voici un bon de livraison. Pour rappel, le nombre de palettes de l'article choisi est: "; // Q7
+char* msg9 = "Voici un autre bon de livraison pour cette meme commande "; // Q7
+char* msg10 = "Bonjour, je suis votre livreur. Voici les 2 bons de livraison"; // Q8
+char* msg11 = "Merci. Je vous rends un bon signe"; // Q9
 
 int main(int argc, char **argv){
     pid_t pidAcheteur;
@@ -43,19 +45,19 @@ int main(int argc, char **argv){
     int tabAcheteurTransporteur[2];
     int tabServeurTransporteur[2];
 
-    int pipeAcheteurServeur = pipe(tabAcheteurServeur); //création du pipe: c'est un tableau de 2 cases où chaque case est un identifient fichier
-                        /*      p[0] → contient le fichier descripteur de l'extrémité de lecture
-                                p[1] → contient le fichier descripteur de l'extrémité d'écriture
+    int pipeAcheteurServeur = pipe(tabAcheteurServeur); //creation du pipe: c'est un tableau de 2 cases ou chaque case est un identifient fichier
+                        /*      p[0] ? contient le fichier descripteur de l'extremite de lecture
+                                p[1] ? contient le fichier descripteur de l'extremite d'ecriture
                         */
-    if (pipeAcheteurServeur < 0) { 
+    if (pipeAcheteurServeur < 0) {
         printf("ACHETEUR. Tube non support\u00e9. Fin\n");
-        exit(1);   // si pipe() est executée avec succès alors la fonction renvoie 0, -1 sinon       
+        exit(1);   // si pipe() est executee avec succes alors la fonction renvoie 0, -1 sinon
     }
     printf("ACHETEUR. Activation du mode non bloquant.\n");
-    if (fcntl(tabAcheteurServeur[0], F_SETFL, O_NONBLOCK) < 0) { 
+    if (fcntl(tabAcheteurServeur[0], F_SETFL, O_NONBLOCK) < 0) {
     /*  Fonction qui rend la lecture du pipe non bloquante (asynchrone)
         Dans ce cas read() dans un tube vide ne bloque pas et renvoie -1.
-        Ce n'est pas considéré comme fin de fichier, mais une erreur
+        Ce n'est pas considere comme fin de fichier, mais une erreur
     */
         printf("ACHETEUR. Mode non bloquant indisponible. Fin\n");
         exit(2);
@@ -67,7 +69,7 @@ int main(int argc, char **argv){
         exit(3);
     }
     printf("SERVEUR. Activation du mode non bloquant.\n");
-    if (fcntl(tabServeurAcheteur[0], F_SETFL, O_NONBLOCK) < 0) { 
+    if (fcntl(tabServeurAcheteur[0], F_SETFL, O_NONBLOCK) < 0) {
         printf("SERVEUR. Mode non bloquant indisponible. Fin\n");
         exit(4);
     }
@@ -78,7 +80,7 @@ int main(int argc, char **argv){
         exit(5);
     }
     printf("TRANSPORTEUR. Activation du mode non bloquant.\n");
-    if (fcntl(tabTransporteurAcheteur[0], F_SETFL, O_NONBLOCK) < 0) { 
+    if (fcntl(tabTransporteurAcheteur[0], F_SETFL, O_NONBLOCK) < 0) {
         printf("TRANSPORTEUR. Mode non bloquant indisponible. Fin\n");
         exit(6);
     }
@@ -89,7 +91,7 @@ int main(int argc, char **argv){
         exit(7);
     }
     printf("ACHETEUR. Activation du mode non bloquant.\n");
-    if (fcntl(tabAcheteurTransporteur[0], F_SETFL, O_NONBLOCK) < 0) { 
+    if (fcntl(tabAcheteurTransporteur[0], F_SETFL, O_NONBLOCK) < 0) {
         printf("ACHETEUR. Mode non bloquant indisponible. Fin\n");
         exit(8);
     }
@@ -100,13 +102,15 @@ int main(int argc, char **argv){
         exit(9);
     }
     printf("SERVEUR. Activation du mode non bloquant.\n");
-    if (fcntl(tabServeurTransporteur[0], F_SETFL, O_NONBLOCK) < 0) { 
+    if (fcntl(tabServeurTransporteur[0], F_SETFL, O_NONBLOCK) < 0) {
         printf("SERVEUR. Mode non bloquant indisponible. Fin\n");
         exit(10);
     }
-
     
-    pidAcheteur = fork(); // création du processus fils
+    printf("\n------------------------------\n");
+    printf("\nD\u00e9but des communications.\n");
+
+    pidAcheteur = fork(); // creation du processus fils
     if (pidAcheteur < 0){ // on teste s'il y a eu un pb
         printf("ACHETEUR. Fork impossible.\n");
         exit(11);
@@ -119,7 +123,6 @@ int main(int argc, char **argv){
             printf("SERVEUR. Fork impossible.\n");
             exit(12);
         } else if (pidServeurWeb == 0) {
-            printf("test\n");
             serveur(tabServeurAcheteur, tabAcheteurServeur, tabServeurTransporteur);
 
         } else {
@@ -130,7 +133,7 @@ int main(int argc, char **argv){
             } else if (pidTransporteur == 0){
                 transporteur(tabTransporteurAcheteur, tabAcheteurTransporteur, tabServeurTransporteur);
             }
-        }        
+        }
     }
     return 0;
 }
@@ -147,41 +150,48 @@ void acheteur(int pSEcriture[], int pSLecture[], int pTEcriture[], int pTLecture
     char* str3Bis; // pour utiliser la fonction sprintf()
     char* msg3Bis;
 
-    write(pSEcriture[1], strcat(msg1, ARTICLE), MSGSIZE); // Question 1: l'acheteur saisit le nom d'un article
-
-    nread = read(pSLecture[0], buf, MSGSIZE); // On lit le message du serveur de la Q2
-    switch (nread){
-        case -1:
-            if (errno == EAGAIN){
-                printf("Tube vide\n");
-                sleep(1);
-            } else {
-                perror("Lecture\n");
-                exit(100);
-            }
-            break;
-        default:
-            printf("ACHETEUR. Message reçu du serveur. Taille = %d. Contenu = \"%s\".\n", nread, buf);
-            break;
-    }
+    write(pSEcriture[1], concat(msg1, ARTICLE), MSGSIZE); // Question 1: l'acheteur saisit le nom d'un article
     
+    //nread = read(pSLecture[0], buf, MSGSIZE); // Q2 on lit la reponse du serveur
+    //printf("ACHETEUR. Message recu du serveur. Contenu = \"%s\".\n", buf);
+
+    /*for (int i = 0; i < 2; i++) {
+        nread = read(pSLecture[0], buf, MSGSIZE); // On lit le message du serveur de la Q2
+        switch (nread){
+            case -1:
+                if (errno == EAGAIN){
+                    printf("Tube vide\n");
+                    sleep(1);
+                    break;
+                } else {
+                    perror("Lecture\n");
+                    exit(100);
+                }
+            default:
+                printf("ACHETEUR. Message recu du serveur. Contenu = \"%s\".\n", buf);
+                break;
+        }
+    }*/
+
     sprintf(str3Bis, "%d", SURFACE); // on convertit la surface en string
     msg3Bis = concat(msg3, str3Bis); // on concatene ce string avec msg3 pour avoir le msg complet
-    write(pSEcriture[1], msg3Bis, MSGSIZE); // Question 3: l'acheteur saisit la surface souhaitée
+    write(pSEcriture[1], msg3Bis, MSGSIZE); // Question 3: l'acheteur saisit la surface souhaitee
 
     nread = read(pSLecture[0],buf, MSGSIZE); // on lit la Q4
-    printf("ACHETEUR. Message reçu du serveur.  Taille = %d. Contenu = \"%s\".\n", nread, buf);
+    printf("ACHETEUR. Message recu du serveur. Contenu = \"%s\".\n", buf);
 
     nread = read(pSLecture[0],buf, MSGSIZE); // on lit la Q4
-    printf("ACHETEUR. Message reçu du serveur.  Taille = %d. Contenu = \"%s\".\n", nread, buf);
-    
-    /* Question 5: l'acheteur paie en saisissant son numéro de carte bancaire et son cryptogramme */
+    printf("ACHETEUR. Message recu du serveur. Contenu = \"%s\".\n", buf);
+
+    /* Question 5: l'acheteur paie en saisissant son numero de carte bancaire et son cryptogramme */
 
     nread = read(pSLecture[0],buf, MSGSIZE); // on lit la Q6
-    printf("ACHETEUR. Message reçu du serveur.  Taille = %d. Contenu = \"%s\".\n", nread, buf);
+    printf("ACHETEUR. Message recu du serveur. Contenu = \"%s\".\n", buf);
 
-    nread = read(pSLecture[0],buf, MSGSIZE); // on lit la Q7
-    printf("ACHETEUR. Message reçu du serveur.  Taille = %d. Contenu = \"%s\".\n", nread, buf);
+    nread = read(pTLecture[0],buf, MSGSIZE); // on lit la Q8
+    printf("ACHETEUR. Message recu du serveur. Contenu = \"%s\".\n", buf);
+
+    write(pTEcriture[1], msg11, MSGSIZE); // Question 9: l'acheteur signe un des bons qu'il remet au livreur
 }
 
 
@@ -196,43 +206,30 @@ void serveur(int pAEcriture[], int pALecture[], int pTEcriture[]){
     char* msg2Bis;
 
     nread = read(pALecture[0], buf, MSGSIZE); // On lit la Q1
-    switch (nread){
-        case -1:
-            if (errno == EAGAIN){
-                printf("Tube vide\n");
-                sleep(1);
-            } else {
-                perror("Lecture\n");
-                exit(101);
-            }
-            break;
-        default:
-            printf("SERVEUR. Message reçu de l'acheteur. Taille = %d. Contenu = \"%s\".\n", nread, buf);
-            break;
-    }
+    printf("\nSERVEUR. Message recu de l'acheteur. Contenu = \"%s\".\n", buf);
 
     sprintf(str2Bis, "%d", QteRouleauStock);
     msg2Bis = concat(msg2, str2Bis);
-    write(pAEcriture[1], msg2Bis, MSGSIZE); // Question 2: le serveur web transmet la quantité disponible en stock
-    
+    write(pAEcriture[1], msg2Bis, MSGSIZE); // Question 2: le serveur web transmet la quantite disponible en stock
+
     nread = read(pALecture[0], buf, MSGSIZE); // On lit la Q3
-    printf("SERVEUR. Message reçu de l'acheteur. Taille = %d. Contenu = \"%s\".\n", nread, buf);
- 
+    printf("SERVEUR. Message recu de l'acheteur. Contenu = \"%s\".\n", buf);
+
     strcat(msg4, getNombrePalettes());
-    write(pAEcriture[1], msg4, MSGSIZE); // Question 4: le serveur transmet le nombre de palettes à l'acheteur
+    write(pAEcriture[1], msg4, MSGSIZE); // Question 4: le serveur transmet le nombre de palettes a l'acheteur
 
     strcat(msg5, getMontantFacture());
-    write(pAEcriture[1], msg5, MSGSIZE); // Question 4: le serveur transmet le montant de la facture à l'acheteur
+    write(pAEcriture[1], msg5, MSGSIZE); // Question 4: le serveur transmet le montant de la facture a l'acheteur
 
     nread = read(pALecture[0], buf, MSGSIZE); // On lit la Q5
-    printf("SERVEUR. Message reçu de l'acheteur. Taille = %d. Contenu = \"%s\".\n", nread, buf);
+    printf("SERVEUR. Message recu de l'acheteur. Contenu = \"%s\".\n", buf);
 
     strcat(msg7, getMontantFacture());
-    write(pAEcriture[1], msg7, MSGSIZE); // Question 6: le serveur web envoie un accusé de réception du paiement à l'acheteur, rappelant le montant total de la transaction
+    write(pAEcriture[1], msg7, MSGSIZE); // Question 6: le serveur web envoie un accuse de reception du paiement a l'acheteur, rappelant le montant total de la transaction
 
-    /*strcat(msg8, getNombrePalettes());
-    write(pTEcriture[1], msg8, MSGSIZE);
-    write(pTEcriture[1], msg8, MSGSIZE);*/ // Question 7: le serveur web transmet un bon de livraison comprenant le nombre de palettes de l'article choisi, en double exemplaires au transporteur
+    strcat(msg8, getNombrePalettes());
+    write(pTEcriture[1], msg8, MSGSIZE); // Question 7: le serveur web transmet un bon de livraison comprenant le nombre de palettes de l'article choisi
+    write(pTEcriture[1], msg9, MSGSIZE); // Q7: en double exemplaire au transporteur
 
 }
 
@@ -246,22 +243,15 @@ void transporteur(int pAEcriture[], int pALecture[], int pSLecture[]){
 
     /*
     nread = read(pSLecture[0], buf, MSGSIZE); // On lit la Q7
-    switch (nread){
-        case -1:
-            if (errno == EAGAIN){
-                printf("Tube vide\n");
-                sleep(1);
-            } else {
-                perror("Lecture\n");
-                exit(102);
-            }
-            break;
-        default:
-            printf("TRANSPORTEUR. Message reçu du serveur. Taille = %d. Contenu = \"%s\".\n", nread, buf);
-            break;
-    }
-    nread = read(pSLecture[0], buf, MSGSIZE); // Q7
-    printf("TRANSPORTEUR. Message reçu du serveur. Taille = %d. Contenu = \"%s\".\n", nread, buf);
+    printf("TRANSPORTEUR. Message recu du serveur. Contenu = \"%s\".\n", buf);
+
+    nread = read(pSLecture[0], buf, MSGSIZE); // On lit la Q7
+    printf("TRANSPORTEUR. Message recu du serveur. Contenu = \"%s\".\n", buf);
+
+    write(pAEcriture[1], msg10, MSGSIZE); // Question 8: le transporteur livre à l'acheteur en lui remettant les 2 bons
+
+    nread = read(pALecture[0], buf, MSGSIZE); // On lit la Q9
+    printf("TRANSPORTEUR. Message recu du transporteur. Contenu = \"%s\".\n", buf);
     */
 
 }
@@ -274,7 +264,7 @@ char* getNombrePalettes(){
 
     if (n <= 63){
         sprintf(nbPalettes, "%d", compteur);
-        return nbPalettes;   
+        return nbPalettes;
     } else {
         while (n > 63){
             n = n-63;
@@ -289,11 +279,11 @@ char* getMontantFacture(){
     printf("SERVEUR. Calcul du montant de la facture...\n");
     int prixTotal;
     char *prixFacture = NULL;
- 
+
     prixFacture= (char*) malloc((10*sizeof(char)));
     prixTotal = (SURFACE * PrixRouleau);
     sprintf(prixFacture, "%d", prixTotal);
-	return prixFacture;
+    return prixFacture;
 }
 
 char* concat(const char *s1, const char *s2)
@@ -303,3 +293,4 @@ char* concat(const char *s1, const char *s2)
     strcat(result, s2);
     return result;
 }
+
