@@ -184,6 +184,13 @@ void acheteur(int pSEcriture[], int pSLecture[], int pTEcriture[], int pTLecture
     printf("ACHETEUR. Message recu du serveur. Contenu = \"%s\".\n", buf);
 
     /* Question 5: l'acheteur paie en saisissant son numero de carte bancaire et son cryptogramme */
+    
+    int crypto;
+    printf( "Veuillez saisir votre cryptogramme : " );
+    fflush( stdout );
+    scanf("[%d]", &crypto);
+    
+    write(pSEcriture[1], &crypto, MSGSIZE);
 
     nread = read(pSLecture[0],buf, MSGSIZE); // on lit la Q6
     printf("ACHETEUR. Message recu du serveur. Contenu = \"%s\".\n", buf);
