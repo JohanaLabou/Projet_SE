@@ -190,6 +190,37 @@ void acheteur(int pSEcriture[], int pSLecture[], int pTEcriture[], int pTLecture
     fflush( stdout );
     scanf("[%d]", &crypto);
     
+    length = strlen (crypto);
+    for (i=0;i<length; i++)
+    {
+        if (!isdigit(input[i]))
+        {
+            printf ("Entrez un nombre\n");
+            exit(1);
+        }
+        if(length>3){
+            printf("Entrez un cryptogramme de 3 chiffres");
+        }
+    }
+    
+    int numeroCarte;
+    printf( "Veuillez saisir votre numéro de carte : " );
+    fflush( stdout );
+    scanf("[%d]", &numeroCarte);
+    
+    length = strlen (numeroCarte);
+    for (i=0;i<length; i++)
+    {
+        if (!isdigit(input[i]))
+        {
+            printf ("Entrez un nombre de 16 chiffres\n");
+            exit(1);
+        }
+        if(length != 16){
+            printf("Entrez un cryptogramme de 3 chiffres");
+        }
+    }
+    
     write(pSEcriture[1], &crypto, MSGSIZE);
 
     nread = read(pSLecture[0],buf, MSGSIZE); // on lit la Q6
