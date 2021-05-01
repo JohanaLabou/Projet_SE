@@ -25,7 +25,7 @@ char* concat(const char *s1, const char *s2);
 char* getMontantFacture();
 char* getNombrePalettes();
 void boucleLecture (int p[], const char* ROLE, const char* signature);
-int getNombreDigit(char s[]);
+int getNombreDigit(char s[], int longueurVoulue);
 
 int main(int argc, char **argv){
     pid_t pidAcheteur;
@@ -157,14 +157,23 @@ void acheteur(int pSEcriture[], int pSLecture[], int pTEcriture[], int pTLecture
     boucleLecture(pSLecture, SERVEUR, signature);
 
     // Question 5: l'acheteur paie en saisissant son numero de carte bancaire et son cryptogramme
-    char numCarteEtCrypto[19];
-	printf("Veuillez saisir votre num\u00e9ro de carte bancaire suivi de votre cryptogramme (19 chiffres au total): ");
-	int x = getNombreDigit(numCarteEtCrypto);
-	while (x != 19){
-	    printf("Vous n'avez pas saisi 19 chiffres... Veuillez r\u00e9essayer: ");
-	    x = getNombreDigit(numCarteEtCrypto);
+    char numCarte[16];
+	printf("Veuillez saisir votre num\u00e9ro de carte bancaire (16 chiffres au total): ");
+	int x = getNombreDigit(numCarte, 17);
+	while (x != 16){ // On boucle jusqu'a ce que l'utilisateur rentre bien 16 chiffres
+	    printf("Vous n'avez pas saisi 16 chiffres... Veuillez r\u00e9essayer: ");
+	    x = getNombreDigit(numCarte, 17);
 	}
-    write(pSEcriture[1], numCarteEtCrypto, MSGSIZE);
+    // pareil pour le cryptogramme:
+    char crypto[3];
+    printf("Veuillez saisir votre cryptogramme (3 chiffres): ");
+    int c = getNombreDigit(crypto, 4);
+    while (c != 3){ 
+	    printf("Vous n'avez pas saisi 3 chiffres... Veuillez r\u00e9essayer: ");
+	    c = getNombreDigit(crypto, 4);
+	}
+    write(pSEcriture[1], numCarte, MSGSIZE);
+    write(pSEcriture[1], crypto, MSGSIZE);
 
     boucleLecture(pSLecture, SERVEUR, signature); // On lit la question 6
     boucleLecture(pTLecture, TRANSPORTEUR, signature); // Q8 on lit le msg du transporteur
@@ -181,7 +190,7 @@ void serveur(int pAEcriture[], int pALecture[], int pTEcriture[]){
     char* msg2 = "Le nombre de rouleaux en stock disponible pour cet article est "; // Q2
     char msg4[MSGSIZE] = "Commande recue. Nombre total de palette(s): "; // Q4
     char msg4Bis[MSGSIZE] = "Montant total de la facture: "; // Q4
-    char* msg6 = "J'accuse r\u00e9ception de votre paiment. Le montant de la transaction \u00e9tait de: "; // Q6
+    char* msg6 = "J'accuse r\u00e9ception de votre paiement. Le montant de la transaction \u00e9tait de: "; // Q6
     char* msg7 = "Voici un bon de livraison. Pour rappel, le nombre de palettes de l'article choisi est: "; // Q7
     char* msg7Bis = "Voici un autre bon de livraison pour cette meme commande"; // Q7
 
@@ -199,6 +208,7 @@ void serveur(int pAEcriture[], int pALecture[], int pTEcriture[]){
     write(pAEcriture[1], concat(msg4Bis, getMontantFacture()), MSGSIZE); // Question 4: le serveur transmet le montant de la facture a l'acheteur
 
     boucleLecture(pALecture, ACHETEUR, signature); // On lit la question 5
+    boucleLecture(pALecture, ACHETEUR, signature);
 
     write(pAEcriture[1], concat(msg6, getMontantFacture()), MSGSIZE); // Question 6: le serveur web envoie un accuse de reception du paiement a l'acheteur, rappelant le montant total de la transaction
     write(pTEcriture[1], concat(msg7, getNombrePalettes()), MSGSIZE); // Question 7: le serveur web transmet un bon de livraison comprenant le nombre de palettes de l'article choisi
@@ -283,9 +293,9 @@ void boucleLecture (int p[], const char* ROLE, const char* signature){
     }
 }
 
-int getNombreDigit(char s[]){ 
+int getNombreDigit(char s[], int longueurVoulue){ 
 	int compteur=0; 
- 	while(compteur<20){ //au plus 19 digits 
+ 	while(compteur<longueurVoulue){ //au plus longueurVoulue digits 
  		s[compteur]=getchar(); 
  		if(!isdigit(s[compteur])){ //break if non digit entered 
  			s[compteur]='\0';//end string with a null. 
