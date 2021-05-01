@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <math.h>
+#include <strings.h> 
 
 #define ARTICLE "classique"
 #define SERVEUR "sw1"
@@ -185,42 +186,34 @@ void acheteur(int pSEcriture[], int pSLecture[], int pTEcriture[], int pTLecture
 
     /* Question 5: l'acheteur paie en saisissant son numero de carte bancaire et son cryptogramme */
     
-    int crypto;
-    printf( "Veuillez saisir votre cryptogramme : " );
-    fflush( stdout );
-    scanf("[%d]", &crypto);
-    
-    length = strlen (crypto);
-    for (i=0;i<length; i++)
-    {
-        if (!isdigit(input[i]))
-        {
-            printf ("Entrez un nombre\n");
-            exit(1);
-        }
-        if(length>3){
+    int numCarte;
+    printf( "Veuillez saisir votre numéro de carte à 16 chiffres : " );
+    scanf("%d", &numCarte);
+    int countNum=0;
+    while(numCarte!=0)  
+    {  
+       numCarte /= 10;  
+       countNum++;  
+    }
+    if(countNum != 8){ /* On suppose le numéro de carte à 8 chiffres */
+        printf("Entrez un numéro de carte à 16 chiffres");
+    }
+    else{
+        int crypto;
+        printf( "Veuillez saisir votre cryptogramme : " );
+        scanf("%d", &crypto);
+        int count=0;
+        while(crypto!=0)  
+        {  
+           crypto=crypto/10;  
+           count++;  
+        }  
+        if(count != 3){
             printf("Entrez un cryptogramme de 3 chiffres");
         }
     }
     
-    int numeroCarte;
-    printf( "Veuillez saisir votre numéro de carte : " );
-    fflush( stdout );
-    scanf("[%d]", &numeroCarte);
-    
-    length = strlen (numeroCarte);
-    for (i=0;i<length; i++)
-    {
-        if (!isdigit(input[i]))
-        {
-            printf ("Entrez un nombre de 16 chiffres\n");
-            exit(1);
-        }
-        if(length != 16){
-            printf("Entrez un cryptogramme de 3 chiffres");
-        }
-    }
-    
+    write(pSEcriture[1], &numCarte, MSGSIZE);
     write(pSEcriture[1], &crypto, MSGSIZE);
 
     nread = read(pSLecture[0],buf, MSGSIZE); // on lit la Q6
