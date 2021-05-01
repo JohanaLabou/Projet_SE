@@ -6,6 +6,7 @@
 #include <string.h>
 #include <math.h>
 #include <sys/wait.h>
+#include <ctype.h>
 
 #define ARTICLE "classique"
 #define SERVEUR "sw1"
@@ -24,6 +25,7 @@ char* concat(const char *s1, const char *s2);
 char* getMontantFacture();
 char* getNombrePalettes();
 void boucleLecture (int p[], const char* ROLE, const char* signature);
+int getNombreDigit();
 
 int main(int argc, char **argv){
     pid_t pidAcheteur;
@@ -141,7 +143,7 @@ void acheteur(int pSEcriture[], int pSLecture[], int pTEcriture[], int pTLecture
     char buf[MSGSIZE];
     const char* signature = "ACHETEUR";
 
-    char* msg1 = "Bonjour, je souhaiterais avoir l'article "; // Q1
+    char* msg1 = "Je souhaiterais avoir l'article "; // Q1
     char* msg3 = "Je souhaite passer une commande pour une surface de "; // Q3
     char* msg9 = "Merci. Je vous rends un bon sign\u00e9"; // Q9
 
@@ -157,11 +159,14 @@ void acheteur(int pSEcriture[], int pSLecture[], int pTEcriture[], int pTLecture
     boucleLecture(pSLecture, SERVEUR, signature);
 
     // Question 5: l'acheteur paie en saisissant son numero de carte bancaire et son cryptogramme
-    int crypto;
-    printf("Veuillez saisir votre num\u00e9ro de carte bancaire (16 chiffres) suivi de votre cryptogramme (3 chiffres): ");
-    fflush(stdout);
-    scanf("[%d]", &crypto);
-    write(pSEcriture[1], &crypto, MSGSIZE);
+    char numCarteEtCrypto[19];
+	printf("Veuillez saisir votre num\u00e9ro de carte bancaire suivi de votre cryptogramme (19 chiffres au total): ");
+	int x = getNombreDigit(numCarteEtCrypto);
+	while (x != 19){
+	    printf("Vous n'avez pas saisi 19 chiffres... Veuillez r\u00e9essayer: ");
+	    x = getNombreDigit(numCarteEtCrypto);
+	}
+    write(pSEcriture[1], numCarteEtCrypto, MSGSIZE);
 
     boucleLecture(pSLecture, SERVEUR, signature); // On lit la question 6
     boucleLecture(pTLecture, TRANSPORTEUR, signature); // Q8 on lit le msg du transporteur
@@ -280,3 +285,17 @@ void boucleLecture (int p[], const char* ROLE, const char* signature){
         }
     }
 }
+
+int getNombreDigit(char s[]){ 
+	int compteur=0; 
+ 	while(compteur<20){ //au plus 19 digits 
+ 		s[compteur]=getchar(); 
+ 		if(!isdigit(s[compteur])){ //break if non digit entered 
+ 			s[compteur]='\0';//end string with a null. 
+ 			break; 
+ 		} 
+ 		compteur++; 
+	} 
+	s[compteur]='\0';
+    return compteur; 
+} 
